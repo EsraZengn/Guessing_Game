@@ -11,7 +11,7 @@
         Submit
       </button>
     </div>
-    <label :class="'c-guess ' + guess" v-if="this.guess !== ''">{{
+    <label v-if="this.guess !== ''" :class="'c-guess ' + setClass">{{
       guess
     }}</label>
     <transition name="stretch">
@@ -35,6 +35,15 @@ export default {
       required: true,
     },
   },
+  computed: {
+    setClass() {
+      return this.guess === "lower"
+        ? "lower"
+        : this.guess === "higher"
+        ? "higher"
+        : "bingo";
+    },
+  },
   data() {
     return {
       number: "",
@@ -44,8 +53,14 @@ export default {
   },
   methods: {
     async onClicked() {
-      if (isNaN(this.number) || this.number < 0 || this.number > 100) {
+      if (
+        isNaN(this.number) ||
+        this.number === "" ||
+        this.number < 0 ||
+        this.number > 100
+      ) {
         this.error = "Please enter valid number!";
+        this.guess = "";
         return;
       }
 
@@ -64,6 +79,7 @@ export default {
         })
         .catch((error) => {
           this.error = error.message;
+          this.guess = "";
         });
     },
   },
@@ -120,6 +136,37 @@ export default {
   padding: 0.7em;
 }
 
+.c-guess {
+  font-weight: bold;
+}
+
+.bingo {
+  color: red;
+  font-size: 1.5em;
+  animation: slide-sideways 0.4s linear infinite both;
+}
+
+@keyframes slide-sideways {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
 .lower {
   color: #cb410b;
   animation: slide-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
@@ -162,12 +209,6 @@ export default {
 .c-guess,
 .c-error {
   padding-bottom: 4%;
-}
-
-.c-guess {
-  color: red;
-  font-size: 1.5em;
-  font-weight: bold;
 }
 
 .stretch-enter-active {
